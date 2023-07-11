@@ -133,6 +133,7 @@
 #define B3  (7)
 #if ELECTRONS
 #define KTOT (8)
+#if HEATING
 #if ALLMODELS     // Nested if statement for ALLMODELS run
 #define KEL0 (9)  // Kawazura
 #define KEL1 (10) // Werner
@@ -142,10 +143,15 @@
 #else
 #define KEL0  (9)
 #define NVAR (10)
-#endif
+#endif // ALLMODELS
+#endif // HEATING
+#if COOLING
+#define KEL0(9)
+#define NVAR(10)
+#endif // COOLING
 #else
-#define NVAR (8)
-#endif
+#define NVAR(9)
+#endif // ELECTRONS
 
 // Centering of grid functions
 #define FACE1 (0)
@@ -436,8 +442,13 @@ void update_f(struct FluidFlux *F, GridPrim *dU);
 // electrons.c
 #if ELECTRONS
 void init_electrons(struct GridGeom *G, struct FluidState *S);
+#if HEATING
 void heat_electrons(struct GridGeom *G, struct FluidState *Sh, struct FluidState *S);
 void fixup_electrons(struct FluidState *S);
+#endif
+#if COOLING
+void cool_electrons(struct GridGeom *G, struct FluidState *S);
+#endif
 #endif
 
 // fixup.c

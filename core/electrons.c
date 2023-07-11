@@ -9,7 +9,7 @@
 #include "decs.h"
 
 #if ELECTRONS
-
+#if HEATING
 // TODO put these in options with a default in decs.h
 // Defined as in decs.h, CONSTANT not included in ALLMODELS version
 // KAWAZURA is run by default if ALLMODELS=0 
@@ -22,6 +22,11 @@
 void fixup_electrons_1zone(struct FluidState *S, int i, int j, int k);
 void heat_electrons_1zone(struct GridGeom *G, struct FluidState *Sh, struct FluidState *S, int i, int j, int k);
 double get_fels(struct GridGeom *G, struct FluidState *S, int i, int j, int k, int model);
+#endif
+
+#if COOLING
+void cool_electrons_1zone(struct GridGeom *G, struct FluidState *S, int i, int j, int k);
+#endif
 
 void init_electrons(struct GridGeom *G, struct FluidState *S)
 {
@@ -42,6 +47,7 @@ void init_electrons(struct GridGeom *G, struct FluidState *S)
   set_bounds(G, S);
 }
 
+#if HEATING
 // TODO merge these
 void heat_electrons(struct GridGeom *G, struct FluidState *Ss, struct FluidState *Sf)
 {
@@ -134,7 +140,39 @@ if (model == KAWAZURA) {
 
   return fel;
 }
+#endif // HEATING
 
+#if COOLING
+void cool_electrons(struct GridGeom *G, struct FluidState *S)
+{
+  #pragma omp parallel for collapse(2)
+  ZLOOP {
+    cool_electrons_1zone(G, S, i, j, k);
+  }
+}
+
+inline void cool_electrons_1zone(struct GridGeom *G, struct FluidState *S, int i, int j, int k)
+{
+//Have to initialize tau here for now because I can't figure out how to initialize it in prob/flat_space.
+//I wanted to initialize it in decs.h as "extern int tau;" and then set it equal to 5 in param.dat, but iharm
+//didn't like when I had "static int tau;" in problem.c so I just hardcoded it here instead
+  double tau = 5.;
+
+ //to fing uel:
+  double uel = pow(S->P[RHO][k][j][i], game)*S->P[KEL0][k][j][i]/(game-1);
+
+  //update the internal energy of the electrons at (i,j):
+  uel = uel*exp(-dt*0.5/(tau));
+
+  //update the entropy with the new internal energy
+  S->P[KEL0][k][j][i] = uel/pow(S->P[RHO][k][j][i], game)*(game-1);
+
+  get_state(G, S, i, j, k, CENT);
+  prim_to_flux(G, S, i, j, k, 0, CENT, S->U);
+}
+#endif // COOLING
+
+#if HEATING
 void fixup_electrons(struct FluidState *S)
 {
   timer_start(TIMER_ELECTRON_FIXUP);
@@ -161,7 +199,7 @@ inline void fixup_electrons_1zone(struct FluidState *S, int i, int j, int k)
 	// Enforce minimum Tp/Te
     S->P[idx][k][j][i] = MY_MIN(S->P[idx][k][j][i], kelmax);
   }
-
+  #endif // HEATING
 }
 #endif // ELECTRONS
 
