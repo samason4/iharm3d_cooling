@@ -9,6 +9,9 @@
 #include "decs.h"
 
 #if ELECTRONS
+
+void fixup_electrons_1zone(struct FluidState *S, int i, int j, int k);
+
 #if HEATING
 // TODO put these in options with a default in decs.h
 // Defined as in decs.h, CONSTANT not included in ALLMODELS version
@@ -18,14 +21,15 @@
 #define ROWAN     11
 #define SHARMA    12
 #define CONSTANT 5 //tbh, this is never considered 
-
-void fixup_electrons_1zone(struct FluidState *S, int i, int j, int k);
 void heat_electrons_1zone(struct GridGeom *G, struct FluidState *Sh, struct FluidState *S, int i, int j, int k);
 double get_fels(struct GridGeom *G, struct FluidState *S, int i, int j, int k, int model);
 #endif
 
 #if COOLING
 void cool_electrons_1zone(struct GridGeom *G, struct FluidState *S, int i, int j, int k);
+#endif
+#if TESTCOOLING
+void test_cool_electrons_1zone(struct GridGeom *G, struct FluidState *S, int i, int j, int k);
 #endif
 
 void init_electrons(struct GridGeom *G, struct FluidState *S)
@@ -151,7 +155,60 @@ void cool_electrons(struct GridGeom *G, struct FluidState *S)
   }
 }
 
+//setting the convertion stuff:
+double CL = 2.99792458e10; // Speed of light
+double GNEWT = 6.6742e-8; // Gravitational constant
+double MSUN 1.989e33; // grams per solar mass
+double M_bh_cgs = M_bh * MSUN;
+double L_unit = GNEWT*M_bh_cgs/pow(CL, 2.);
+double T_unit = L_unit/CL;
+double RHO_unit = M_unit*pow(L_unit, -3.);
+double U_unit = RHO_unit*CL*CL;
+double B_unit = CL*sqrt(4.*M_PI*RHO_unit);
+double Ne_unit = RHO_unit/(MP + ME);
+double Thetae_unit = MP/ME;
+
 inline void cool_electrons_1zone(struct GridGeom *G, struct FluidState *S, int i, int j, int k)
+{
+  //to fing uel and rho in code units:
+  double uel = pow(S->P[RHO][k][j][i], game)*S->P[KEL0][k][j][i]/(game-1);
+  double rho = S->P[RHO][k][j][i];
+  double Tel = (game-1.)*uel/rho;
+  double theta_e = Tel/5.92986e9;
+  double B_mag = bsq_calc(S, i, j, k);
+  double n_e = rho; //I'm assuming that n_e in cgs is just rho in code units multiplied by Ne_unit
+  
+  //converting to cgs:
+  uel = uel*U_unit;
+  rho = rho*RHO_unit;
+  theta_e = theta_e*Thetae_unit;
+  B_mag = B_mag*B_unit;
+  n_e = n_e*Ne_unit
+
+  //update the internal energy of the electrons at (i,j):
+  uel = uel*exp(-dt*0.5*1.28567e-14*pow(B_mag, 2)*n_e*pow(theta_e, 2));
+
+  //convert back to code units:
+  uel = uel/U_unit;
+
+  //update the entropy with the new internal energy
+  S->P[KEL0][k][j][i] = uel/pow(S->P[RHO][k][j][i], game)*(game-1);
+
+  get_state(G, S, i, j, k, CENT);
+  prim_to_flux(G, S, i, j, k, 0, CENT, S->U);
+}
+#endif // COOLING
+
+#if TESTCOOLING
+void test_cool_electrons(struct GridGeom *G, struct FluidState *S)
+{
+  #pragma omp parallel for collapse(2)
+  ZLOOP {
+    test_cool_electrons_1zone(G, S, i, j, k);
+  }
+}
+
+inline void test_cool_electrons_1zone(struct GridGeom *G, struct FluidState *S, int i, int j, int k)
 {
 //Have to initialize tau here for now because I can't figure out how to initialize it in prob/flat_space.
 //I wanted to initialize it in decs.h as "extern int tau;" and then set it equal to 5 in param.dat, but iharm
@@ -170,9 +227,8 @@ inline void cool_electrons_1zone(struct GridGeom *G, struct FluidState *S, int i
   get_state(G, S, i, j, k, CENT);
   prim_to_flux(G, S, i, j, k, 0, CENT, S->U);
 }
-#endif // COOLING
+#endif // TESTCOOLING
 
-#if HEATING
 void fixup_electrons(struct FluidState *S)
 {
   timer_start(TIMER_ELECTRON_FIXUP);
@@ -199,6 +255,5 @@ inline void fixup_electrons_1zone(struct FluidState *S, int i, int j, int k)
     S->P[idx][k][j][i] = MY_MIN(S->P[idx][k][j][i], kelmax);
   }
 }
-#endif // HEATING
 #endif // ELECTRONS
 

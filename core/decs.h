@@ -149,6 +149,10 @@
 #define KEL0  (9)
 #define NVAR (10)
 #endif // COOLING
+#if TESTCOOLING
+#define KEL0  (9)
+#define NVAR (10)
+#endif // TESTCOOLING
 #else
 #define KEL0  (9)
 #endif // ELECTRONS
@@ -318,6 +322,7 @@ extern int nthreads;
 extern double game, gamp;
 extern double fel0;
 extern double tptemin, tptemax;
+extern double M_unit, M_bh;
 #endif
 
 
@@ -442,12 +447,15 @@ void update_f(struct FluidFlux *F, GridPrim *dU);
 // electrons.c
 #if ELECTRONS
 void init_electrons(struct GridGeom *G, struct FluidState *S);
+void fixup_electrons(struct FluidState *S);
 #if HEATING
 void heat_electrons(struct GridGeom *G, struct FluidState *Sh, struct FluidState *S);
-void fixup_electrons(struct FluidState *S);
 #endif
 #if COOLING
 void cool_electrons(struct GridGeom *G, struct FluidState *S);
+#endif
+#if TESTCOOLING
+void test_cool_electrons(struct GridGeom *G, struct FluidState *S);
 #endif
 #endif
 

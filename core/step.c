@@ -43,6 +43,9 @@ void step(struct GridGeom *G, struct FluidState *S)
 #if COOLING
   cool_electrons(G, S);
 #endif
+#if TESTCOOLING
+  test_cool_electrons(G, S);
+#endif
 #endif
 
   advance_fluid(G, S, S, Stmp, 0.5*dt);
@@ -59,10 +62,8 @@ void step(struct GridGeom *G, struct FluidState *S)
   fixup(G, Stmp);
   FLAG("Fixup Tmp");
 #if ELECTRONS
-#if HEATING
   fixup_electrons(Stmp);
   FLAG("Fixup e- Tmp");
-#endif
 #endif
   // Need an MPI call _before_ fixup_utop to obtain correct pflags
   set_bounds(G, Stmp);
@@ -80,6 +81,9 @@ void step(struct GridGeom *G, struct FluidState *S)
 #if COOLING
   cool_electrons(G, S);
 #endif
+#if TESTCOOLING
+  test_cool_electrons(G, S);
+#endif
 #endif
 
 #if ELECTRONS
@@ -92,10 +96,8 @@ void step(struct GridGeom *G, struct FluidState *S)
   fixup(G, S);
   FLAG("Fixup Full");
 #if ELECTRONS
-#if HEATING
   fixup_electrons(S);
   FLAG("Fixup e- Full");
-#endif
 #endif
   set_bounds(G, S);
   FLAG("First bounds Full");

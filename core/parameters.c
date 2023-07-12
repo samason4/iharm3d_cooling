@@ -72,6 +72,8 @@ void set_core_params() {
   set_param("fel0", &fel0);
   set_param("tptemin", &tptemin);
   set_param("tptemax", &tptemax);
+  set_param("M_unit", &M_unit);
+  set_param("M_bh", &M_bh);
 #endif
 
   set_param("DTd", &DTd);

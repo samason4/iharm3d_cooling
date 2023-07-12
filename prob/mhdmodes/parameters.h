@@ -37,6 +37,7 @@
  */
 #define ELECTRONS           1
 #define COOLING             0
+#define testCOOLING         0
 #define HEATING             1
 #define SUPPRESS_HIGHB_HEAT 1
 #define BETA_HEAT           1

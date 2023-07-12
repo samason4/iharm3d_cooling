@@ -1,7 +1,7 @@
 ### RUNTIME PARAMETERS FOR EHT COMPARISON PROBLEM ###
 
 # COORDINATES
-[dbl] tf = 10000.0
+[dbl] tf = 4000.0
 [dbl] dt = 1.0e-06
 [dbl] Rout = 50.0
 
@@ -25,6 +25,8 @@
 [dbl] fel0 = 0.01
 [dbl] tptemin = 0.001
 [dbl] tptemax = 1000.0
+[dbl] M_bh = 4.154e6 #mass of sag A* in solar masses
+[dbl] M_unit = 1.e20 #arbitrary
 
 # PROBLEM
 [dbl] rin = 6.0

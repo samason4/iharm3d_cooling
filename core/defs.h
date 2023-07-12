@@ -58,6 +58,7 @@ int nthreads;
 double game, gamp;
 double fel0;
 double tptemin, tptemax;
+double M_unit, M_bh;
 #endif
 
 int global_start[3];

@@ -38,6 +38,7 @@
  */
 #define ELECTRONS           1
 #define COOLING             0
+#define TESTCOOLING         0
 #define HEATING             1
 #define ALLMODELS           0   // Flag for enabling all models
 #define SUPPRESS_HIGHB_HEAT 1
