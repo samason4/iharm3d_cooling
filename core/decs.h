@@ -146,11 +146,11 @@
 #endif // ALLMODELS
 #endif // HEATING
 #if COOLING
-#define KEL0(9)
-#define NVAR(10)
+#define KEL0  (9)
+#define NVAR (10)
 #endif // COOLING
 #else
-#define NVAR(9)
+#define KEL0  (9)
 #endif // ELECTRONS
 
 // Centering of grid functions

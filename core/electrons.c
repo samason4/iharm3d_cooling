@@ -187,7 +187,6 @@ void fixup_electrons(struct FluidState *S)
 
 inline void fixup_electrons_1zone(struct FluidState *S, int i, int j, int k)
 {
-
   double kelmax = S->P[KTOT][k][j][i]*pow(S->P[RHO][k][j][i],gam-game)/(tptemin*(gam-1.)/(gamp-1.) + (gam-1.)/(game-1.));
   double kelmin = S->P[KTOT][k][j][i]*pow(S->P[RHO][k][j][i],gam-game)/(tptemax*(gam-1.)/(gamp-1.) + (gam-1.)/(game-1.));
 
@@ -199,7 +198,7 @@ inline void fixup_electrons_1zone(struct FluidState *S, int i, int j, int k)
 	// Enforce minimum Tp/Te
     S->P[idx][k][j][i] = MY_MIN(S->P[idx][k][j][i], kelmax);
   }
-  #endif // HEATING
 }
+#endif // HEATING
 #endif // ELECTRONS
 

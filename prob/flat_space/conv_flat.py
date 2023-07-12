@@ -13,35 +13,35 @@ globalvars_keys = ['PROB','NDIMS','DUMPSDIR9','DUMPSDIR5','DUMPSDIR2','DUMPSDIR0
 globalvars = {}
 grid ={}
 
-# python prob/flat_space/conv_flat.py -p prob/flat_space/param.dat
+# python3 prob/flat_space/conv_flat.py -p ./prob/flat_space/params_analysis.dat
 
 # The actual function that computes and plots diagnostics for PROB=torus and NDIMS=2
-def find_error(dumpsdir, dumpval, i, j):
-    print(dumpval, "percent done")
-    plt.clf()
-    dfile = h5py.File(os.path.join(globalvars[dumpsdir],'dump_0000{0:04d}.h5'.format(dumpval)),'r')
-    print("rho: ", dfile['prims'][()][Ellipsis,0])
-    print("KEL0: ", np.array(dfile['prims'][()][Ellipsis,0]))
-    rho = dfile['prims'][()][Ellipsis,0].reshape(grid['n1'], grid['n2'], grid['n3'])[i][j]
-    KEL0 = np.array(dfile['prims'][()][Ellipsis,0]).reshape(grid['n1'], grid['n2'], grid['n3'])[i][j]
+def find_error(dumpsdir, i, j):
+    dfile = h5py.File(os.path.join(globalvars[dumpsdir],'dump_0000{0:04d}.h5'.format(100)),'r')
+    rho = dfile['prims'][()][Ellipsis,0].reshape(grid['n1'], grid['n2'], grid['n3'])[i][j][0]
+    KEL0 = np.array(dfile['prims'][()][Ellipsis,9]).reshape(grid['n1'], grid['n2'], grid['n3'])[i][j][0]
     t = dfile['t'][()]
     game = 1.333333
     dfile.close()
     t = "{:.3f}".format(t)
 
     #numerical:
+    print("numerical rho: ", rho, "and kel0: ", KEL0)
     u_num = rho**game*KEL0/(game-1)
 
     #analytical:
     dfile_init = h5py.File(os.path.join(globalvars[dumpsdir],'dump_0000{0:04d}.h5'.format(0000)),'r')
-    rho_init = dfile['prims'][()][Ellipsis,0][i][j]
-    KEL0_init = np.array(dfile['prims'][()][Ellipsis,0])[i][j]
+    rho_init = dfile_init['prims'][()][Ellipsis,0].reshape(grid['n1'], grid['n2'], grid['n3'])[i][j][0]
+    KEL0_init = np.array(dfile_init['prims'][()][Ellipsis,9]).reshape(grid['n1'], grid['n2'], grid['n3'])[i][j][0]
     dfile_init.close()
+    print("initial rho: ", rho_init, "and kel0: ", KEL0_init)
     u0 = rho_init**game*KEL0_init/(game-1)
     alpha = -0.2
+    print("time: ", float(t))
     u_ana = u0*np.exp(alpha*float(t))
 
     #error:
+    print("error: ", abs(u_num-u_ana))
     return (abs(u_num-u_ana))
 
 
@@ -89,10 +89,11 @@ if __name__=="__main__":
     errors05 = 0
     for i in range(10):
         for j in range(10):
-            errors9 += find_error('DUMPSDIR9', 100, i, j)
-            errors5 += find_error('DUMPSDIR5', 100, i, j)
-            errors2 += find_error('DUMPSDIR2', 100, i, j)
-            errors05 += find_error('DUMPSDIR05', 100, i, j)
+            errors9 += find_error('DUMPSDIR9', i, j)
+            errors5 += find_error('DUMPSDIR5', i, j)
+            errors2 += find_error('DUMPSDIR2', i, j)
+            errors05 += find_error('DUMPSDIR05', i, j)
+            print(i*10+j+1, "percent done")
     errors.append(errors9/100)
     cour_inv.append(1/.9)
     errors.append(errors5/100)
