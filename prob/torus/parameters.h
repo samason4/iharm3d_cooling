@@ -37,10 +37,10 @@
  *   BETA_HEAT         - (0,1) BETA-DEPENDENT HEATING
  */
 #define ELECTRONS           1
-#define COOLING             0
+#define COOLING             1
 #define TESTCOOLING         0
-#define HEATING             1
-#define ALLMODELS           0   // Flag for enabling all models
+#define HEATING             0
+#define ALLMODELS           1   // Flag for enabling all models
 #define SUPPRESS_HIGHB_HEAT 1
 #define BETA_HEAT           1
 

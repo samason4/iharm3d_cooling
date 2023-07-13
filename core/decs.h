@@ -146,8 +146,16 @@
 #endif // ALLMODELS
 #endif // HEATING
 #if COOLING
+#if ALLMODELS     // Nested if statement for ALLMODELS run
+#define KEL0 (9)  // Kawazura
+#define KEL1 (10) // Werner
+#define KEL2 (11) // Rowan
+#define KEL3 (12) // Sharma
+#define NVAR (13)
+#else
 #define KEL0  (9)
 #define NVAR (10)
+#endif // ALLMODELS
 #endif // COOLING
 #if TESTCOOLING
 #define KEL0  (9)
@@ -155,6 +163,7 @@
 #endif // TESTCOOLING
 #else
 #define KEL0  (9)
+#define NVAR  (10)
 #endif // ELECTRONS
 
 // Centering of grid functions

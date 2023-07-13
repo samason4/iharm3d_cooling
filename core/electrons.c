@@ -12,7 +12,6 @@
 
 void fixup_electrons_1zone(struct FluidState *S, int i, int j, int k);
 
-#if HEATING
 // TODO put these in options with a default in decs.h
 // Defined as in decs.h, CONSTANT not included in ALLMODELS version
 // KAWAZURA is run by default if ALLMODELS=0 
@@ -21,6 +20,8 @@ void fixup_electrons_1zone(struct FluidState *S, int i, int j, int k);
 #define ROWAN     11
 #define SHARMA    12
 #define CONSTANT 5 //tbh, this is never considered 
+
+#if HEATING
 void heat_electrons_1zone(struct GridGeom *G, struct FluidState *Sh, struct FluidState *S, int i, int j, int k);
 double get_fels(struct GridGeom *G, struct FluidState *S, int i, int j, int k, int model);
 #endif
@@ -170,32 +171,34 @@ double Thetae_unit = MP/ME;
 
 inline void cool_electrons_1zone(struct GridGeom *G, struct FluidState *S, int i, int j, int k)
 {
-  //to fing uel and rho in code units:
-  double uel = pow(S->P[RHO][k][j][i], game)*S->P[KEL0][k][j][i]/(game-1);
-  double rho = S->P[RHO][k][j][i];
-  double Tel = (game-1.)*uel/rho;
-  double theta_e = Tel/5.92986e9;
-  double B_mag = bsq_calc(S, i, j, k);
-  double n_e = rho; //I'm assuming that n_e in cgs is just rho in code units multiplied by Ne_unit
-  
-  //converting to cgs:
-  uel = uel*U_unit;
-  rho = rho*RHO_unit;
-  theta_e = theta_e*Thetae_unit;
-  B_mag = B_mag*B_unit;
-  n_e = n_e*Ne_unit
+  for (int idx = KEL0; idx < NVAR ; idx++) {
+    //to fing uel and rho in code units:
+    double uel = pow(S->P[RHO][k][j][i], game)*S->P[idx][k][j][i]/(game-1);
+    double rho = S->P[RHO][k][j][i];
+    double Tel = (game-1.)*uel/rho;
+    double theta_e = Tel/5.92986e9;
+    double B_mag = bsq_calc(S, i, j, k);
+    double n_e = rho; //I'm assuming that n_e in cgs is just rho in code units multiplied by Ne_unit
+    
+    //converting to cgs:
+    uel = uel*U_unit;
+    rho = rho*RHO_unit;
+    theta_e = theta_e*Thetae_unit;
+    B_mag = B_mag*B_unit;
+    n_e = n_e*Ne_unit
 
-  //update the internal energy of the electrons at (i,j):
-  uel = uel*exp(-dt*0.5*1.28567e-14*pow(B_mag, 2)*n_e*pow(theta_e, 2));
+    //update the internal energy of the electrons at (i,j):
+    uel = uel*exp(-dt*0.5*1.28567e-14*pow(B_mag, 2)*n_e*pow(theta_e, 2));
 
-  //convert back to code units:
-  uel = uel/U_unit;
+    //convert back to code units:
+    uel = uel/U_unit;
 
-  //update the entropy with the new internal energy
-  S->P[KEL0][k][j][i] = uel/pow(S->P[RHO][k][j][i], game)*(game-1);
+    //update the entropy with the new internal energy
+    S->P[idx][k][j][i] = uel/pow(S->P[RHO][k][j][i], game)*(game-1);
 
-  get_state(G, S, i, j, k, CENT);
-  prim_to_flux(G, S, i, j, k, 0, CENT, S->U);
+    get_state(G, S, i, j, k, CENT);
+    prim_to_flux(G, S, i, j, k, 0, CENT, S->U);
+  }
 }
 #endif // COOLING
 
