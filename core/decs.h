@@ -133,7 +133,7 @@
 #define B3  (7)
 #if ELECTRONS
 #define KTOT (8)
-#if HEATING
+#if HEATING && COOLING
 #if ALLMODELS     // Nested if statement for ALLMODELS run
 #define KEL0 (9)  // Kawazura
 #define KEL1 (10) // Werner
@@ -144,8 +144,7 @@
 #define KEL0  (9)
 #define NVAR (10)
 #endif // ALLMODELS
-#endif // HEATING
-#if COOLING
+#elif HEATING
 #if ALLMODELS     // Nested if statement for ALLMODELS run
 #define KEL0 (9)  // Kawazura
 #define KEL1 (10) // Werner
@@ -156,7 +155,18 @@
 #define KEL0  (9)
 #define NVAR (10)
 #endif // ALLMODELS
-#endif // COOLING
+#elif COOLING
+#if ALLMODELS     // Nested if statement for ALLMODELS run
+#define KEL0 (9)  // Kawazura
+#define KEL1 (10) // Werner
+#define KEL2 (11) // Rowan
+#define KEL3 (12) // Sharma
+#define NVAR (13)
+#else
+#define KEL0  (9)
+#define NVAR (10)
+#endif // ALLMODELS
+#endif // HEATING and COOLING
 #if TESTCOOLING
 #define KEL0  (9)
 #define NVAR (10)

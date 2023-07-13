@@ -150,27 +150,28 @@ if (model == KAWAZURA) {
 #if COOLING
 void cool_electrons(struct GridGeom *G, struct FluidState *S)
 {
+  //looping through gridzones:
   #pragma omp parallel for collapse(2)
   ZLOOP {
     cool_electrons_1zone(G, S, i, j, k);
   }
 }
 
-//setting the convertion stuff:
-double CL = 2.99792458e10; // Speed of light
-double GNEWT = 6.6742e-8; // Gravitational constant
-double MSUN 1.989e33; // grams per solar mass
-double M_bh_cgs = M_bh * MSUN;
-double L_unit = GNEWT*M_bh_cgs/pow(CL, 2.);
-double T_unit = L_unit/CL;
-double RHO_unit = M_unit*pow(L_unit, -3.);
-double U_unit = RHO_unit*CL*CL;
-double B_unit = CL*sqrt(4.*M_PI*RHO_unit);
-double Ne_unit = RHO_unit/(MP + ME);
-double Thetae_unit = MP/ME;
-
 inline void cool_electrons_1zone(struct GridGeom *G, struct FluidState *S, int i, int j, int k)
 {
+  //setting the convertion stuff:
+  double CL = 2.99792458e10; // Speed of light
+  double GNEWT = 6.6742e-8; // Gravitational constant
+  double MSUN = 1.989e33; // grams per solar mass
+  double M_bh_cgs = M_bh * MSUN;
+  double L_unit = GNEWT*M_bh_cgs/pow(CL, 2.);
+  double T_unit = L_unit/CL;
+  double RHO_unit = M_unit*pow(L_unit, -3.);
+  double U_unit = RHO_unit*CL*CL;
+  double B_unit = CL*sqrt(4.*M_PI*RHO_unit);
+  double Ne_unit = RHO_unit/(MP + ME);
+  double Thetae_unit = MP/ME;
+
   for (int idx = KEL0; idx < NVAR ; idx++) {
     //to fing uel and rho in code units:
     double uel = pow(S->P[RHO][k][j][i], game)*S->P[idx][k][j][i]/(game-1);
@@ -185,7 +186,7 @@ inline void cool_electrons_1zone(struct GridGeom *G, struct FluidState *S, int i
     rho = rho*RHO_unit;
     theta_e = theta_e*Thetae_unit;
     B_mag = B_mag*B_unit;
-    n_e = n_e*Ne_unit
+    n_e = n_e*Ne_unit;
 
     //update the internal energy of the electrons at (i,j):
     uel = uel*exp(-dt*0.5*1.28567e-14*pow(B_mag, 2)*n_e*pow(theta_e, 2));
