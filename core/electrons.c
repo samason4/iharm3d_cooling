@@ -178,7 +178,7 @@ inline void cool_electrons_1zone(struct GridGeom *G, struct FluidState *S, int i
     double rho = S->P[RHO][k][j][i];
     double Tel = (game-1.)*uel/rho;
     double theta_e = Tel/5.92986e9;
-    double B_mag = bsq_calc(S, i, j, k);
+    double B_mag = pow(bsq_calc(S, i, j, k), 2.);
     double n_e = rho; //I'm assuming that n_e in cgs is just rho in code units multiplied by Ne_unit
     
     //converting to cgs:
