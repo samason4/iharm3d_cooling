@@ -25,8 +25,8 @@
 [dbl] fel0 = 0.01
 [dbl] tptemin = 0.001
 [dbl] tptemax = 1000.0
-[dbl] M_bh = 4.154e6 #mass of sag A* in solar masses
-[dbl] M_unit = 1.e20 #arbitrary
+[dbl] M_bh = 6.5e9 #mass of M87* in solar masses
+[dbl] M_unit = 1.e28 #arbitrary
 
 # PROBLEM
 [dbl] rin = 6.0

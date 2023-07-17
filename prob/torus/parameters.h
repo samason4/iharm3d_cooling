@@ -37,6 +37,7 @@
  *   BETA_HEAT         - (0,1) BETA-DEPENDENT HEATING
  */
 #define ELECTRONS           1
+#define KTOTMAX             1000
 #define COOLING             1
 #define TESTCOOLING         0
 #define HEATING             0

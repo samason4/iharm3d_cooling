@@ -163,6 +163,7 @@ inline void cool_electrons_1zone(struct GridGeom *G, struct FluidState *S, int i
   double CL = 2.99792458e10; // Speed of light
   double GNEWT = 6.6742e-8; // Gravitational constant
   double MSUN = 1.989e33; // grams per solar mass
+  double Kbol = 1.380649e-16; // boltzmann constant
   double M_bh_cgs = M_bh * MSUN;
   double L_unit = GNEWT*M_bh_cgs/pow(CL, 2.);
   double T_unit = L_unit/CL;
@@ -173,20 +174,18 @@ inline void cool_electrons_1zone(struct GridGeom *G, struct FluidState *S, int i
   double Thetae_unit = MP/ME;
 
   for (int idx = KEL0; idx < NVAR ; idx++) {
-    //to fing uel and rho in code units:
+    //to fing uel and rho and such in (mostly)code units:
     double uel = pow(S->P[RHO][k][j][i], game)*S->P[idx][k][j][i]/(game-1);
     double rho = S->P[RHO][k][j][i];
-    double Tel = (game-1.)*uel/rho;
-    double theta_e = Tel/5.92986e9;
-    double B_mag = pow(bsq_calc(S, i, j, k), 2.);
-    double n_e = rho; //I'm assuming that n_e in cgs is just rho in code units multiplied by Ne_unit
+    double n_e = rho*Ne_unit;
+    double Tel = (game-1.)*uel*U_unit*/(n_e*Kbol); // this is in kelvin
+    double theta_e = Tel/5.92986e9; // therefore this is unitless
+    double B_mag = pow(bsq_calc(S, i, j, k), 0.5);
     
     //converting to cgs:
     uel = uel*U_unit;
-    rho = rho*RHO_unit;
-    theta_e = theta_e*Thetae_unit;
+    n_e = rho*RHO_unit;
     B_mag = B_mag*B_unit;
-    n_e = n_e*Ne_unit;
 
     //update the internal energy of the electrons at (i,j):
     uel = uel*exp(-dt*0.5*1.28567e-14*pow(B_mag, 2)*n_e*pow(theta_e, 2));

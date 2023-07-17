@@ -335,7 +335,9 @@ extern int nthreads;
 // Electrons
 #if ELECTRONS
 // TODO put these in parameters.h? Define MP/ME direct?
+#ifndef KTOTMAX
 #define KTOTMAX (3.)
+#endif
 #define ME (9.1093826e-28  ) // Electron mass
 #define MP (1.67262171e-24 ) // Proton mass
 extern double game, gamp;
