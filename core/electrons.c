@@ -178,7 +178,7 @@ inline void cool_electrons_1zone(struct GridGeom *G, struct FluidState *S, int i
     double uel = pow(S->P[RHO][k][j][i], game)*S->P[idx][k][j][i]/(game-1);
     double rho = S->P[RHO][k][j][i];
     double n_e = rho*Ne_unit;
-    double Tel = (game-1.)*uel*U_unit*/(n_e*Kbol); // this is in kelvin
+    double Tel = (game-1.)*uel*U_unit/(n_e*Kbol); // this is in kelvin
     double theta_e = Tel/5.92986e9; // therefore this is unitless
     double B_mag = pow(bsq_calc(S, i, j, k), 0.5);
     
