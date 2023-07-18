@@ -180,9 +180,10 @@ inline void cool_electrons_1zone(struct GridGeom *G, struct FluidState *S, int i
     double Tel = (game-1.)*uel/(n_e*Kbol); // this is in kelvin
     double theta_e = Tel/5.92986e9; // therefore this is unitless
     double B_mag = pow(bsq_calc(S, i, j, k), 0.5)*B_unit;
+    double dt_cgs = dt*T_unit;
 
     //update the internal energy of the electrons at (i,j):
-    uel = uel*exp(-dt*0.5*1.28567e-14*B_mag*B_mag*n_e*theta_e*theta_e);
+    uel = uel*exp(-dt_cgs*0.5*1.28567e-14*B_mag*B_mag*n_e*theta_e*theta_e);
 
     //convert back to code units:
     uel = uel/U_unit;
