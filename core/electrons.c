@@ -174,21 +174,15 @@ inline void cool_electrons_1zone(struct GridGeom *G, struct FluidState *S, int i
   double Thetae_unit = MP/ME;
 
   for (int idx = KEL0; idx < NVAR ; idx++) {
-    //to fing uel and rho and such in (mostly)code units:
-    double uel = pow(S->P[RHO][k][j][i], game)*S->P[idx][k][j][i]/(game-1);
-    double rho = S->P[RHO][k][j][i];
-    double n_e = rho*Ne_unit;
-    double Tel = (game-1.)*uel*U_unit/(n_e*Kbol); // this is in kelvin
+    //to fing uel and rho and such in cgs:
+    double uel = (pow(S->P[RHO][k][j][i], game)*S->P[idx][k][j][i]/(game-1))*U_unit;
+    double n_e = (S->P[RHO][k][j][i])*Ne_unit;
+    double Tel = (game-1.)*uel/(n_e*Kbol); // this is in kelvin
     double theta_e = Tel/5.92986e9; // therefore this is unitless
-    double B_mag = pow(bsq_calc(S, i, j, k), 0.5);
-    
-    //converting to cgs:
-    uel = uel*U_unit;
-    n_e = rho*RHO_unit;
-    B_mag = B_mag*B_unit;
+    double B_mag = pow(bsq_calc(S, i, j, k), 0.5)*B_unit;
 
     //update the internal energy of the electrons at (i,j):
-    uel = uel*exp(-dt*0.5*1.28567e-14*pow(B_mag, 2)*n_e*pow(theta_e, 2));
+    uel = uel*exp(-dt*0.5*1.28567e-14*B_mag*B_mag*n_e*theta_e*theta_e);
 
     //convert back to code units:
     uel = uel/U_unit;
