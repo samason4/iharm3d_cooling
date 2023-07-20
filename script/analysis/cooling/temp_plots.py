@@ -82,7 +82,7 @@ def xy_slice(var, average=False, patch_phi=False):
         xy_var[:,0] = xy_var[:,-1] = 0
     return xy_var
 
-def analysis_torus2d(dumpval, cmap='jet', vmin=-13, vmax=-9, domain = [-50,0,-50,50], bh=True, shading='gouraud'):
+def analysis_torus2d(dumpval, cmap='jet', vmin=5, vmax=12, domain = [-50,0,-50,50], bh=True, shading='gouraud'):
     plt.clf()
     print("Analyzing {0:04d} dump".format(dumpval))
     dfile = h5py.File(os.path.join(globalvars['DUMPSDIR_heat'],'dump_0000{0:04d}.h5'.format(dumpval)),'r')
@@ -100,11 +100,21 @@ def analysis_torus2d(dumpval, cmap='jet', vmin=-13, vmax=-9, domain = [-50,0,-50
     #which ended up being way too small, and I didn't want to go through and change theta to Tel, just for the sake of time
     ME = 9.1093826e-28 #Electron mass
     MP = 1.67262171e-24 #Proton mass
-    Thetae_unit = MP/ME
-    theta0 = np.log10((game-1.)*uel0/rho/5.92986e9*Thetae_unit)
-    theta1 = np.log10((game-1.)*uel1/rho/5.92986e9*Thetae_unit)
-    theta2 = np.log10((game-1.)*uel2/rho/5.92986e9*Thetae_unit)
-    theta3 = np.log10((game-1.)*uel3/rho/5.92986e9*Thetae_unit)
+    CL = 2.99792458e10 # Speed of light
+    GNEWT = 6.6742e-8 # Gravitational constant
+    MSUN = 1.989e33 # grams per solar mass
+    Kbol = 1.380649e-16 # boltzmann constant
+    M_bh = 6.5e9 #mass of M87* in solar masses
+    M_unit = 1.e28 #arbitrary
+    M_bh_cgs = M_bh * MSUN
+    L_unit = GNEWT*M_bh_cgs/pow(CL, 2.)
+    RHO_unit = M_unit*pow(L_unit, -3.)
+    Ne_unit = RHO_unit/(MP + ME)
+    U_unit = RHO_unit*CL*CL
+    theta0 = np.log10((game-1.)*uel0*U_unit/(rho*Ne_unit*Kbol))
+    theta1 = np.log10((game-1.)*uel1*U_unit/(rho*Ne_unit*Kbol))
+    theta2 = np.log10((game-1.)*uel2*U_unit/(rho*Ne_unit*Kbol))
+    theta3 = np.log10((game-1.)*uel3*U_unit/(rho*Ne_unit*Kbol))
     t = dfile['t'][()]
     dfile.close()
     t = "{:.3f}".format(t)
@@ -129,10 +139,10 @@ def analysis_torus2d(dumpval, cmap='jet', vmin=-13, vmax=-9, domain = [-50,0,-50
     uel12 = rho2**game2*KEL12/(game2-1.)
     uel22 = rho2**game2*KEL22/(game2-1.)
     uel32 = rho2**game2*KEL32/(game2-1.)
-    theta02 = np.log10((game2-1.)*uel02/rho2/5.92986e9*Thetae_unit)
-    theta12 = np.log10((game2-1.)*uel12/rho2/5.92986e9*Thetae_unit)
-    theta22 = np.log10((game2-1.)*uel22/rho2/5.92986e9*Thetae_unit)
-    theta32 = np.log10((game2-1.)*uel32/rho2/5.92986e9*Thetae_unit)
+    theta02 = np.log10((game2-1.)*uel02*U_unit/(rho2*Ne_unit*Kbol))
+    theta12 = np.log10((game2-1.)*uel12*U_unit/(rho2*Ne_unit*Kbol))
+    theta22 = np.log10((game2-1.)*uel22*U_unit/(rho2*Ne_unit*Kbol))
+    theta32 = np.log10((game2-1.)*uel32*U_unit/(rho2*Ne_unit*Kbol))
     t2 = dfile2['t'][()]
     dfile2.close()
     t2 = "{:.3f}".format(t2)
